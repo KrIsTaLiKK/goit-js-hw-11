@@ -23,14 +23,14 @@ p {
 }
 
 .form {
-  margin-bottom: 50px;
+  margin-bottom: 80px;
 }
 
 .text-field__group {
   display: flex;
   margin: 0 auto;
   width: 100%;
-  height: 60px;
+  height: 80px;
   border-radius: 16px;
 }
 
@@ -39,7 +39,7 @@ p {
 }
 
 .text-field__btn {
-  font-size: 30px;
+  font-size: 35px;
   width: 303px;
   height: 100%;
   line-height: 0;
@@ -53,17 +53,21 @@ p {
   transition: background-color 0.15s ease-in-out;
 }
 
+.text-field__btn:hover {
+  opacity: 0.7;
+}
+
 .cont-pos-search-icon {
   position: relative;
-  height: 60px;
+  height: 80px;
 }
 
 .search-icon.is-active {
   position: absolute;
   top: 0;
   left: 0;
-  top: -60px;
-  left: 91%;
+  top: -67px;
+  left: 1%;
   width: 58px;
   height: 48px;
   display: block;
@@ -71,7 +75,7 @@ p {
   border: 3px solid green;
   border-radius: 50%;
   box-sizing: border-box;
-  cursor: pointer;
+
   animation: animloader 2s linear infinite;
 }
 .search-icon.is-active::after {
@@ -134,7 +138,7 @@ p {
 
   cursor: pointer;
 
-  transform: translate(-260px, 50%);
+  transform: translate(-260px, 70%);
 }
 
 .close-button-wrap:hover {
@@ -150,7 +154,7 @@ p {
 }
 
 .container {
-  width: 1280px;
+  width: 1440px;
   max-width: 100%;
   margin-left: auto;
   margin-right: auto;
@@ -265,3 +269,47 @@ p {
   background-size: cover;
   background-image: url('../img/night-sky.jpg');
 } */
+
+/* ============= LOADER =============== */
+
+.loader {
+  color: #ececf8;
+  font-size: 36px;
+}
+/* .loader {
+  width: 48px;
+  height: 48px;
+  display: inline-block;
+  position: absolute;
+  top: 190px;
+  border-width: 3px 2px 3px 2px;
+  border-style: solid dotted solid dotted;
+  border-color: #de3500 rgba(255, 255, 255, 0.3) #fff rgba(151, 107, 93, 0.3);
+  border-radius: 50%;
+  box-sizing: border-box;
+  animation: 1s rotate linear infinite;
+}
+.loader:before,
+.loader:after {
+  content: '';
+  top: 0;
+  left: 0;
+  position: absolute;
+  border: 10px solid transparent;
+  border-bottom-color: #fff;
+  transform: translate(-10px, 19px) rotate(-35deg);
+}
+.loader:after {
+  border-color: #de3500 #0000 #0000 #0000;
+  transform: translate(32px, 3px) rotate(-35deg);
+} */
+
+.loader.is-hidden {
+  display: none;
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}

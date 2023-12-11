@@ -6,4 +6,5 @@ export const refs = {
   searchIcon: document.querySelector('.search-icon'),
   target: document.querySelector('.guard'),
   body: document.querySelector('body'),
+  input: document.querySelector('.text-field__input'),
 };

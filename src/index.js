@@ -4,7 +4,7 @@ import Notiflix from 'notiflix';
 import { ImgApiService } from './js/img-api';
 import { refs } from './js/refs';
 import { upBtnVisible } from './js/scroll';
-// import { LoadMoreBtn } from './js/components/load-more-btn';
+import { Loader } from './js/components/loader';
 import { SearchQueryIcons } from './js/components/searchQueryIcons';
 
 const imgApiService = new ImgApiService();
@@ -12,6 +12,7 @@ const imgApiService = new ImgApiService();
 // const loadMoreBtn = new LoadMoreBtn();
 
 const searchQueryIcons = new SearchQueryIcons();
+const loader = new Loader();
 
 const notifyOptions = {
   width: '500px',
@@ -38,11 +39,12 @@ refs.searchForm.addEventListener('submit', onFormSubmit);
 function onLoad(entries) {
   if (entries[0].isIntersecting) {
     imgApiService.incrementPage();
-
+    loader.show();
     imgApiService
       .fetchImg()
       .then(data => {
         renderImgGallery(data.hits);
+        loader.hide();
         checkTotalPages(data.totalHits);
       })
       .catch(fetchError);
@@ -61,6 +63,7 @@ function onFormSubmit(e) {
   if (!imgApiService.query) {
     return;
   }
+  loader.show();
 
   imgApiService.resetPage();
   // loadMoreBtn.hide();
@@ -94,6 +97,7 @@ function onFormSubmit(e) {
 
       refs.body.classList.remove('overlay');
       renderImgGallery(data.hits);
+      loader.hide();
 
       observer.observe(refs.target);
 
