@@ -273,10 +273,6 @@ p {
 /* ============= LOADER =============== */
 
 .loader {
-  color: #ececf8;
-  font-size: 36px;
-}
-/* .loader {
   width: 48px;
   height: 48px;
   display: inline-block;
@@ -302,7 +298,7 @@ p {
 .loader:after {
   border-color: #de3500 #0000 #0000 #0000;
   transform: translate(32px, 3px) rotate(-35deg);
-} */
+}
 
 .loader.is-hidden {
   display: none;

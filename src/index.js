@@ -1,6 +1,10 @@
 import 'modern-normalize/modern-normalize.css';
 import { lightbox } from './js/lightbox';
-import Notiflix from 'notiflix';
+import {
+  notifyFailureMsg,
+  notifySuccessMsg,
+  reportFailureMsg,
+} from './js/notiflix';
 import { ImgApiService } from './js/img-api';
 import { refs } from './js/refs';
 import { upBtnVisible } from './js/scroll';
@@ -13,13 +17,6 @@ const imgApiService = new ImgApiService();
 
 const searchQueryIcons = new SearchQueryIcons();
 const loader = new Loader();
-
-const notifyOptions = {
-  width: '500px',
-  borderRadius: '20px',
-  fontSize: '25px',
-  useIcon: false,
-};
 
 // ========= OBSERVER ===========
 let options = {
@@ -72,7 +69,6 @@ function onFormSubmit(e) {
 
   imgApiService.resetPage();
   observer.unobserve(refs.target);
-  // loadMoreBtn.hide();
 
   imgApiService
     .fetchImg()
@@ -80,27 +76,13 @@ function onFormSubmit(e) {
       if (!data.hits.length) {
         form.reset();
         searchQueryIcons.hide();
+        loader.hide();
 
-        return Notiflix.Report.failure(
-          'Oops!',
-          'Sorry, there are no images matching your search query. Please try again.',
-          'Okay',
-          {
-            titleFontSize: '25px',
-            messageFontSize: '25px',
-            buttonFontSize: '20px',
-            width: '520px',
-            svgSize: '0px',
-            backOverlayClickToClose: true,
-          }
-        );
+        reportFailureMsg();
+        return;
       }
 
-      Notiflix.Notify.success(
-        `😊Hooray!
-       We found ${data.totalHits} images!`,
-        notifyOptions
-      );
+      notifySuccessMsg(data.totalHits);
 
       refs.body.classList.remove('overlay');
       renderImgGallery(data.hits);
@@ -145,11 +127,7 @@ function checkTotalPages(totalHits) {
   if (totalPages === currentPage) {
     // loadMoreBtn.hide();
     observer.unobserve(refs.target);
-    Notiflix.Notify.failure(
-      "We're sorry, but you've reached the end of search results 😪",
-
-      notifyOptions
-    );
+    notifyFailureMsg();
   }
 }
 
@@ -199,7 +177,8 @@ function renderImgGallery(data) {
 }
 
 function fetchError(error) {
-  alert('Oops!Something went wrong! Try reloading the page!');
+  loader.hide();
+  reportFailureMsg();
 }
 
 function clearGalleryContainer() {
