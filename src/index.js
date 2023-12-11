@@ -3,18 +3,81 @@ import { lightbox } from './js/lightbox';
 import { ImgApiService } from './js/img-api';
 import { refs } from './js/refs';
 import { upBtnVisible } from './js/scroll';
-import { LoadMoreBtn } from './js/components/load-more-btn';
+// import { LoadMoreBtn } from './js/components/load-more-btn';
 import { SearchQueryIcons } from './js/components/searchQueryIcons';
 
 const imgApiService = new ImgApiService();
 
-const loadMoreBtn = new LoadMoreBtn();
+// const loadMoreBtn = new LoadMoreBtn();
 
 const searchQueryIcons = new SearchQueryIcons();
 
+// ========= OBSERVER ===========
+let options = {
+  root: null,
+  rootMargin: '300px',
+  threshold: 1.0,
+};
+
+let observer = new IntersectionObserver(onLoad, options);
+
+// ========= OBSERVER ===========
+
 refs.searchForm.addEventListener('input', onInputChange);
 refs.searchForm.addEventListener('submit', onFormSubmit);
-loadMoreBtn.refs.btnLoadMore.addEventListener('click', onLoadMore);
+// loadMoreBtn.refs.btnLoadMore.addEventListener('click', onLoadMore);
+
+function onLoad(entries) {
+  if (entries[0].isIntersecting) {
+    imgApiService.incrementPage();
+
+    imgApiService
+      .fetchImg()
+      .then(data => {
+        renderImgGallery(data.hits);
+        checkTotalPages(data.totalHits);
+      })
+      .catch(fetchError);
+  }
+}
+
+// ========== FORM SUBMIT ==================
+
+function onFormSubmit(e) {
+  e.preventDefault();
+  clearGalleryContainer();
+
+  const form = e.currentTarget;
+  imgApiService.query = form.elements.searchQuery.value.trim();
+
+  if (!imgApiService.query) {
+    return;
+  }
+
+  imgApiService.resetPage();
+  // loadMoreBtn.hide();
+
+  imgApiService
+    .fetchImg()
+    .then(data => {
+      if (!data.hits.length) {
+        return alert(
+          'Sorry, there are no images matching your search query. Please try again.'
+        );
+      }
+
+      renderImgGallery(data.hits);
+
+      observer.observe(refs.target);
+
+      // loadMoreBtn.show();
+      window.addEventListener('scroll', upBtnVisible);
+
+      searchQueryIcons.hideLupa();
+      checkTotalPages(data.totalHits);
+    })
+    .catch(fetchError);
+}
 
 // Функция, которая при изменении инпута - показывает иконку лупы и кнопку крестик и УБИРАЕТ их, если инпут пустой
 function onInputChange(e) {
@@ -37,56 +100,13 @@ function onInputChange(e) {
   }
 }
 
-function onLoadMore() {
-  imgApiService.incrementPage();
-
-  imgApiService
-    .fetchImg()
-    .then(data => {
-      renderImgGallery(data.hits);
-      checkTotalPages(data.totalHits);
-    })
-    .catch(fetchError);
-}
-
-function onFormSubmit(e) {
-  e.preventDefault();
-  clearGalleryContainer();
-
-  const form = e.currentTarget;
-  imgApiService.query = form.elements.searchQuery.value.trim();
-
-  if (!imgApiService.query) {
-    return;
-  }
-
-  imgApiService.resetPage();
-  loadMoreBtn.hide();
-
-  imgApiService
-    .fetchImg()
-    .then(data => {
-      if (!data.hits.length) {
-        return alert(
-          'Sorry, there are no images matching your search query. Please try again.'
-        );
-      }
-
-      renderImgGallery(data.hits);
-      loadMoreBtn.show();
-      window.addEventListener('scroll', upBtnVisible);
-
-      checkTotalPages(data.totalHits);
-      searchQueryIcons.hideLupa();
-    })
-    .catch(fetchError);
-}
-
 function checkTotalPages(totalHits) {
   const totalPages = imgApiService.countTotalPages(totalHits);
   const currentPage = imgApiService.showCurrentPage();
+  console.log('totalPages', totalPages);
   if (totalPages === currentPage) {
-    loadMoreBtn.hide();
+    // loadMoreBtn.hide();
+    observer.unobserve(refs.target);
   }
 }
 
