@@ -24,7 +24,7 @@ export class ImgApiService {
     return axios
       .get(`${BASE_URL}?key=${API_KEY}&${params}`)
       .then(({ data }) => {
-        console.log(data);
+        // console.log('FETCH', data);
         return data;
       });
   }

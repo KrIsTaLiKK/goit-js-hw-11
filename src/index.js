@@ -37,18 +37,23 @@ refs.searchForm.addEventListener('submit', onFormSubmit);
 // loadMoreBtn.refs.btnLoadMore.addEventListener('click', onLoadMore);
 
 function onLoad(entries) {
-  if (entries[0].isIntersecting) {
-    imgApiService.incrementPage();
-    loader.show();
-    imgApiService
-      .fetchImg()
-      .then(data => {
-        renderImgGallery(data.hits);
-        loader.hide();
-        checkTotalPages(data.totalHits);
-      })
-      .catch(fetchError);
-  }
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      loader.show();
+
+      imgApiService.incrementPage();
+
+      imgApiService
+        .fetchImg()
+        .then(data => {
+          renderImgGallery(data.hits);
+          loader.hide();
+
+          checkTotalPages(data.totalHits);
+        })
+        .catch(fetchError);
+    }
+  });
 }
 
 // ========== FORM SUBMIT ==================
@@ -66,6 +71,7 @@ function onFormSubmit(e) {
   loader.show();
 
   imgApiService.resetPage();
+  observer.unobserve(refs.target);
   // loadMoreBtn.hide();
 
   imgApiService
