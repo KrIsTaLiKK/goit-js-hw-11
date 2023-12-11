@@ -74,6 +74,7 @@ function onFormSubmit(e) {
       if (!data.hits.length) {
         form.reset();
         searchQueryIcons.hide();
+
         return Notiflix.Report.failure(
           'Oops!',
           'Sorry, there are no images matching your search query. Please try again.',
