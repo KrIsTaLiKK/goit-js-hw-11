@@ -1,5 +1,6 @@
 import 'modern-normalize/modern-normalize.css';
 import { lightbox } from './js/lightbox';
+import Notiflix from 'notiflix';
 import { ImgApiService } from './js/img-api';
 import { refs } from './js/refs';
 import { upBtnVisible } from './js/scroll';
@@ -11,6 +12,13 @@ const imgApiService = new ImgApiService();
 // const loadMoreBtn = new LoadMoreBtn();
 
 const searchQueryIcons = new SearchQueryIcons();
+
+const notifyOptions = {
+  width: '500px',
+  borderRadius: '20px',
+  fontSize: '25px',
+  useIcon: false,
+};
 
 // ========= OBSERVER ===========
 let options = {
@@ -61,11 +69,30 @@ function onFormSubmit(e) {
     .fetchImg()
     .then(data => {
       if (!data.hits.length) {
-        return alert(
-          'Sorry, there are no images matching your search query. Please try again.'
+        form.reset();
+        searchQueryIcons.hide();
+        return Notiflix.Report.failure(
+          'Oops!',
+          'Sorry, there are no images matching your search query. Please try again.',
+          'Okay',
+          {
+            titleFontSize: '25px',
+            messageFontSize: '25px',
+            buttonFontSize: '20px',
+            width: '520px',
+            svgSize: '0px',
+            backOverlayClickToClose: true,
+          }
         );
       }
 
+      Notiflix.Notify.success(
+        `😊Hooray!
+       We found ${data.totalHits} images!`,
+        notifyOptions
+      );
+
+      refs.body.classList.remove('overlay');
       renderImgGallery(data.hits);
 
       observer.observe(refs.target);
@@ -103,10 +130,15 @@ function onInputChange(e) {
 function checkTotalPages(totalHits) {
   const totalPages = imgApiService.countTotalPages(totalHits);
   const currentPage = imgApiService.showCurrentPage();
-  console.log('totalPages', totalPages);
+
   if (totalPages === currentPage) {
     // loadMoreBtn.hide();
     observer.unobserve(refs.target);
+    Notiflix.Notify.failure(
+      "We're sorry, but you've reached the end of search results 😪",
+
+      notifyOptions
+    );
   }
 }
 

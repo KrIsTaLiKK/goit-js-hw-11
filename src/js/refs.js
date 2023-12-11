@@ -5,4 +5,5 @@ export const refs = {
   closeBtn: document.querySelector('.close-button-wrap'),
   searchIcon: document.querySelector('.search-icon'),
   target: document.querySelector('.guard'),
+  body: document.querySelector('body'),
 };
