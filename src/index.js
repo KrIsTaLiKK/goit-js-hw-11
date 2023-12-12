@@ -4,109 +4,37 @@ import {
   notifyFailureMsg,
   notifySuccessMsg,
   reportFailureMsg,
+  reportMsgNotFoundImg,
 } from './js/notiflix';
-import { ImgApiService } from './js/img-api';
 import { refs } from './js/refs';
+import { ImgApiService } from './js/img-api';
+import { madePhotoCardMarkup } from './js/templates/photo-card';
+import { SearchQueryIcons } from './js/components/searchQueryIcons';
+import { onInputChangeToggleIcons } from './js/searchQueryToggleIcons';
 import { upBtnVisible } from './js/scroll';
 import { Loader } from './js/components/loader';
-import { SearchQueryIcons } from './js/components/searchQueryIcons';
 
 const imgApiService = new ImgApiService();
-
-// const loadMoreBtn = new LoadMoreBtn();
-
 const searchQueryIcons = new SearchQueryIcons();
 const loader = new Loader();
 
 // ========= OBSERVER ===========
-let options = {
+
+let observer = new IntersectionObserver(onLoad, {
   root: null,
   rootMargin: '300px',
   threshold: 1.0,
-};
+});
 
-let observer = new IntersectionObserver(onLoad, options);
-
-// ========= OBSERVER ===========
-
-refs.searchForm.addEventListener('input', onInputChange);
 refs.searchForm.addEventListener('submit', onFormSubmit);
-// loadMoreBtn.refs.btnLoadMore.addEventListener('click', onLoadMore);
-
-function onLoad(entries) {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      loader.show();
-
-      imgApiService.incrementPage();
-
-      imgApiService
-        .fetchImg()
-        .then(data => {
-          renderImgGallery(data.hits);
-          loader.hide();
-
-          checkTotalPages(data.totalHits);
-        })
-        .catch(fetchError);
-    }
-  });
-}
+refs.searchForm.addEventListener('input', onInputChangeToggleIcons);
 
 // ========== FORM SUBMIT ==================
 
 function onFormSubmit(e) {
   e.preventDefault();
   clearGalleryContainer();
-
-  const form = e.currentTarget;
-  imgApiService.query = form.elements.searchQuery.value.trim();
-
-  if (!imgApiService.query) {
-    return;
-  }
-  loader.show();
-
-  imgApiService.resetPage();
-  observer.unobserve(refs.target);
-
-  imgApiService
-    .fetchImg()
-    .then(data => {
-      if (!data.hits.length) {
-        form.reset();
-        searchQueryIcons.hide();
-        loader.hide();
-
-        reportFailureMsg();
-        return;
-      }
-
-      notifySuccessMsg(data.totalHits);
-
-      refs.body.classList.remove('overlay');
-      renderImgGallery(data.hits);
-      loader.hide();
-
-      observer.observe(refs.target);
-
-      // loadMoreBtn.show();
-      window.addEventListener('scroll', upBtnVisible);
-
-      searchQueryIcons.hideLupa();
-      checkTotalPages(data.totalHits);
-    })
-    .catch(fetchError);
-}
-
-// Функция, которая при изменении инпута - показывает иконку лупы и кнопку крестик и УБИРАЕТ их, если инпут пустой
-function onInputChange(e) {
-  searchQueryIcons.refs.closeBtn.addEventListener('click', () => {
-    refs.searchForm.reset();
-    searchQueryIcons.hide();
-  });
-
-  searchQueryIcons.show();
+  onInputChangeToggleIcons(e);
 
   const form = e.currentTarget;
   imgApiService.query = form.elements.searchQuery.value
@@ -116,8 +44,67 @@ function onInputChange(e) {
     .join('');
 
   if (!imgApiService.query) {
-    searchQueryIcons.hide();
+    return;
   }
+
+  loader.show();
+
+  imgApiService.resetPage();
+  observer.unobserve(refs.target);
+
+  renderInterfaceAfterSubmit(form);
+}
+
+// Рендер інтерфейсу після САБМІТУ
+
+async function renderInterfaceAfterSubmit(form) {
+  try {
+    const data = await fetchData();
+
+    if (!data.hits.length) {
+      form.reset();
+      searchQueryIcons.hide();
+      loader.hide();
+
+      reportMsgNotFoundImg();
+      return;
+    }
+
+    notifySuccessMsg(data.totalHits);
+    refs.body.classList.remove('overlay');
+    observer.observe(refs.target);
+    window.addEventListener('scroll', upBtnVisible);
+    searchQueryIcons.hideLupa();
+  } catch (error) {
+    fetchError();
+  }
+}
+
+// Асинхронна функція
+async function fetchData() {
+  try {
+    const { data } = await imgApiService.fetchFromApi();
+    renderImgGallery(data.hits);
+    loader.hide();
+    checkTotalPages(data.totalHits);
+
+    return data;
+  } catch (error) {
+    fetchError();
+  }
+}
+
+// ============== ONLOAD ==================
+
+function onLoad(entries) {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      loader.show();
+
+      imgApiService.incrementPage();
+      fetchData();
+    }
+  });
 }
 
 function checkTotalPages(totalHits) {
@@ -125,59 +112,23 @@ function checkTotalPages(totalHits) {
   const currentPage = imgApiService.showCurrentPage();
 
   if (totalPages === currentPage) {
-    // loadMoreBtn.hide();
     observer.unobserve(refs.target);
     notifyFailureMsg();
   }
 }
 
-// Функция, которая будет рендерить разметку
-
+// Render photo-card markup
 function renderImgGallery(data) {
-  const markup = data
-    .map(
-      ({
-        webformatURL,
-        largeImageURL,
-        tags,
-        likes,
-        views,
-        comments,
-        downloads,
-      }) => {
-        return ` <div class="photo-card">
-      <a href='${largeImageURL}'>
-      <img src="${webformatURL}" alt="${tags}" loading="lazy" height='270px' /></a>
-      <div class="info">
-      <div>
-        <p class="info-item-likes">
-          <b>❤ Likes:</b> ${likes}
-        </p>
-        <p class="info-item-views">
-          <b>👀 Views:</b> ${views}
-        </p>
-        </div>
-        <div>
-        <p class="info-item-comments">
-          <b>💬 Comments:</b> ${comments} 
-        </p>
-        <p class="info-item-downloads">
-          <b>📥 Downloads:</b> ${downloads} 
-        </p>
-        </div>
-      </div>
-    </div>`;
-      }
-    )
-    .join('');
+  const markup = madePhotoCardMarkup(data);
 
   refs.containerGallery.insertAdjacentHTML('beforeend', markup);
 
   lightbox.refresh();
 }
 
-function fetchError(error) {
+function fetchError() {
   loader.hide();
+  searchQueryIcons.show();
   reportFailureMsg();
 }
 
