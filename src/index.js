@@ -61,9 +61,9 @@ function onFormSubmit(e) {
 
 async function renderInterfaceAfterSubmit(form) {
   try {
-    const data = await fetchData();
+    const { hits, totalHits } = await fetchData();
 
-    if (!data.hits.length) {
+    if (!hits.length) {
       form.reset();
       searchQueryIcons.hide();
       loader.hide();
@@ -72,13 +72,10 @@ async function renderInterfaceAfterSubmit(form) {
       return;
     }
 
-    notifySuccessMsg(data.totalHits);
-    refs.body.classList.remove('overlay');
-    observer.observe(refs.target);
+    notifySuccessMsg(totalHits);
+    replaceOverlayBodyToBgc();
 
-    if (data.totalHits < imgApiService.showPerPage()) {
-      observer.unobserve(refs.target);
-    }
+    checkObserver(totalHits);
 
     window.addEventListener('scroll', upBtnVisible);
     searchQueryIcons.hideLupa();
@@ -141,4 +138,18 @@ function fetchError() {
 
 function clearGalleryContainer() {
   refs.containerGallery.innerHTML = '';
+}
+
+function checkObserver(totalHits) {
+  observer.observe(refs.target);
+
+  const perPage = imgApiService.showPerPage();
+
+  if (totalHits < perPage) {
+    observer.unobserve(refs.target);
+  }
+}
+
+function replaceOverlayBodyToBgc() {
+  refs.body.classList.remove('overlay');
 }
