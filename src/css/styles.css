@@ -68,14 +68,14 @@ p {
   height: 80px;
 }
 
-.text-field__label {
+/* .text-field__label {
   position: absolute;
   top: 50%;
   left: 0;
 
   font-size: 30px;
   transform: translate(30px, -50%);
-}
+} */
 
 .search-icon.is-active {
   opacity: 1;
