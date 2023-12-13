@@ -48,4 +48,8 @@ export class ImgApiService {
   countTotalPages(totalHits) {
     return Math.ceil(totalHits / this.perPage);
   }
+
+  showPerPage() {
+    return this.perPage;
+  }
 }

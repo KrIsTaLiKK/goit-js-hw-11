@@ -5,6 +5,7 @@ import {
   notifySuccessMsg,
   reportFailureMsg,
   reportMsgNotFoundImg,
+  notifyFailureMsgEmptyRequest,
 } from './js/notiflix';
 import { refs } from './js/refs';
 import { ImgApiService } from './js/img-api';
@@ -44,6 +45,7 @@ function onFormSubmit(e) {
     .join('');
 
   if (!imgApiService.query) {
+    notifyFailureMsgEmptyRequest();
     return;
   }
 
@@ -73,6 +75,11 @@ async function renderInterfaceAfterSubmit(form) {
     notifySuccessMsg(data.totalHits);
     refs.body.classList.remove('overlay');
     observer.observe(refs.target);
+
+    if (data.totalHits < imgApiService.showPerPage()) {
+      observer.unobserve(refs.target);
+    }
+
     window.addEventListener('scroll', upBtnVisible);
     searchQueryIcons.hideLupa();
   } catch (error) {

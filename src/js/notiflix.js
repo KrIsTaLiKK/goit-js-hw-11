@@ -31,6 +31,13 @@ export function notifyFailureMsg() {
   );
 }
 
+export function notifyFailureMsgEmptyRequest() {
+  Notiflix.Notify.failure(
+    'Sorry, you are sending an empty string! Please enter something in the search field 😊',
+    notifyOptions
+  );
+}
+
 export function reportFailureMsg() {
   return Notiflix.Report.failure(
     'Oops!',
